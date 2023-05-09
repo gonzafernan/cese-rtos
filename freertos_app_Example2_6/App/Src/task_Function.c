@@ -100,7 +100,7 @@ GPIO_TypeDef* LDX_GPIO_Port[]	= { LD1_GPIO_Port, LD2_GPIO_Port, LD3_GPIO_Port };
 void vTaskFunction( void *pvParameters )
 {
 	/*  Declare & Initialize Task Function variables for argument, led, button and task */
-	uint32_t index = 0;
+	uint32_t index = *(uint32_t *)pvParameters;
 
 	ledFlag_t ledFlag = NotBlinking;
 	GPIO_PinState ledState = GPIO_PIN_RESET;

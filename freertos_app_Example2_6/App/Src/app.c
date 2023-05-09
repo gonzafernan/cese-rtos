@@ -65,15 +65,21 @@
 #include "task_Function.h"
 
 // ------ Macros and definitions ---------------------------------------
+#define TASKS_NUM	3
 
 // ------ internal data declaration ------------------------------------
 /* Declare a variable of type xTaskHandle. This is used to reference tasks. */
-TaskHandle_t xTask1Handle;
+TaskHandle_t xTasksHandle[TASKS_NUM];
 
 // ------ internal functions declaration -------------------------------
 
 // ------ internal data definition -------------------------------------
 const char *pcTextForMain = "freertos_app_Example2_6 is running: PO (2 de 6)\r\n\n";
+
+const char *pcTaskTextName[TASKS_NUM] = {"Task 1", "Task 2", "Task 3"};
+
+/* Tasks parameters */
+uint32_t indexTasks[TASKS_NUM] = {0, 1, 2};
 
 // ------ external data definition -------------------------------------
 
@@ -91,16 +97,18 @@ void appInit( void )
 	/* Print out the name of this Example. */
   	vPrintString( pcTextForMain );
 
-	/* Task 1 thread at priority 1 */
-	ret = xTaskCreate( vTaskFunction,				/* Pointer to the function thats implement the task. */
-					   "Task 1",					/* Text name for the task. This is to facilitate debugging only. */
-					   (2 * configMINIMAL_STACK_SIZE),	/* Stack depth in words. 				*/
-					   NULL,						/* We are not using the task parameter.		*/
-					   (tskIDLE_PRIORITY + 1UL),	/* This task will run at priority 1. 		*/
-					   &xTask1Handle );				/* We are using a variable as task handle.	*/
+  	for (uint8_t i = 0; i < TASKS_NUM; ++i) {
+  		/* Task X thread at priority 1 */
+		ret = xTaskCreate( vTaskFunction,				/* Pointer to the function thats implement the task. */
+						pcTaskTextName[i],				/* Text name for the task. This is to facilitate debugging only. */
+						(2 * configMINIMAL_STACK_SIZE),	/* Stack depth in words. */
+						(void *)&indexTasks[i],			/* Task index */
+						(tskIDLE_PRIORITY + 1UL),		/* This task will run at priority 1. */
+						&xTasksHandle[i] );				/* We are using a variable as task handle. */
 
-	/* Check the task was created successfully. */
-	configASSERT( ret == pdPASS );
+		/* Check the task was created successfully. */
+		configASSERT( ret == pdPASS );
+	}
 }
 
 /*------------------------------------------------------------------*-
