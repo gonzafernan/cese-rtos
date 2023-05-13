@@ -63,15 +63,14 @@ typedef struct
 	GPIO_TypeDef*	LDX_GPIO_Port;
 	uint16_t		LDX_Pin;
 	GPIO_PinState	ledState;
-	ledFlag_t		ledFlag;
-	TickType_t 		ledTickCnt;
 } LDX_Config_t;
 
 extern LDX_Config_t LDX_Config[];
 
 // ------ external functions declaration -------------------------------
 
-void vTaskFunction( void *pvParameters );
+void vTaskLed( void *pvParameters );
+void vTaskButton( void *pvParameters );
 
 #ifdef __cplusplus
 }
