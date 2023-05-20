@@ -93,8 +93,10 @@ LDX_Config_t	LDX_Config[] 	= { { LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET, NotBlin
 /* Task Led thread */
 void vTaskLed( void *pvParameters )
 {
-	/*  Declare & Initialize Task Function variables for argument, led, button and task */
-	LDX_Config_t * ptr = (LDX_Config_t *)pvParameters;
+	/*  Declare & Initialize Task Function variables for argument */
+	QueueHandle_t xQueueBlinkEvent = (QueueHandle_t)pvParameters;
+	LDX_Config_t * ptr = &LDX_Config[0];
+	ledFlag_t ledFlag = NotBlinking;
 
 	TickType_t xLastWakeTime;
 
@@ -110,8 +112,11 @@ void vTaskLed( void *pvParameters )
 	/* As per most tasks, this task is implemented in an infinite loop. */
 	for( ;; )
 	{
+		/* Check for new led flag on queue */
+		xQueueReceive(xQueueBlinkEvent, (void *)&ledFlag, 0);
+
 		/* Check Led Flag */
-		if( ptr->ledFlag == Blinking )
+		if( ledFlag == Blinking )
 		{
 			/* Check, Update and Print Led State */
 		   	if( ptr->ledState == GPIO_PIN_RESET )

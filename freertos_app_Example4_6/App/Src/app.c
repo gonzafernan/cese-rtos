@@ -72,6 +72,9 @@
 TaskHandle_t xTaskButtonHandle;
 TaskHandle_t xTaskLedHandle;
 
+/* Declare variable of type xQueueHandle. This is used to reference the queue */
+QueueHandle_t xQueueBtnEvent;
+
 // ------ internal functions declaration -------------------------------
 
 // ------ internal data definition -------------------------------------
@@ -88,30 +91,31 @@ const char *pcTextForMain = "freertos_app_Example4_6 is running: PO (4 de 6)\r\n
 /* App Initialization */
 void appInit( void )
 {
-	LDX_Config_t* ptr;
 	BaseType_t ret;
 
 	/* Print out the name of this Example. */
   	vPrintString( pcTextForMain );
 
-	ptr = &LDX_Config[0];
+  	/* Create queue to store button event */
+  	xQueueBtnEvent = xQueueCreate(1, sizeof(ledFlag_t));
+  	configASSERT( xQueueBtnEvent );
+
 	/* Task Led thread at priority 1 */
 	ret = xTaskCreate( vTaskLed,					/* Pointer to the function thats implement the task. */
 					   "Task Led",						/* Text name for the task. This is to facilitate debugging only. */
 					   (2 * configMINIMAL_STACK_SIZE),	/* Stack depth in words. 				*/
-	                   (void*)ptr,    				/* Pass the ptr as the task parameter. */
+	                   (void*)xQueueBtnEvent,    				/* Pass the queue as the task parameter. */
 					   (tskIDLE_PRIORITY + 1UL),	/* This task will run at priority 1. 		*/
 					   &xTaskLedHandle );			/* We are using a variable as task handle.	*/
 
 	/* Check the task was created successfully. */
 	configASSERT( ret == pdPASS );
 
-	ptr = &LDX_Config[0];
 	/* Task Button thread at priority 1 */
 	ret = xTaskCreate( vTaskButton,					/* Pointer to the function thats implement the task. */
 					   "Task Button",				/* Text name for the task. This is to facilitate debugging only. */
 					   (2 * configMINIMAL_STACK_SIZE),	/* Stack depth in words. 				*/
-	                   (void*)ptr,    				/* Pass the ptr as the task parameter. */
+	                   (void*)xQueueBtnEvent,    	/* Pass the queue as the task parameter. */
 					   (tskIDLE_PRIORITY + 1UL),	/* This task will run at priority 1. 		*/
 					   &xTaskButtonHandle );		/* We are using a variable as task handle.	*/
 
