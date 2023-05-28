@@ -109,13 +109,16 @@ void vTaskButton( void *pvParameters )
 			{
 				lValueToSend = Blinking;
 				vPrintTwoStrings( pcTaskName, pcTextForTask_BlinkingOn );
+				/* Release semaphore to allow blinking */
+				xSemaphoreGive(SemaphoreHandle);
 			}
 			else
 			{
 				lValueToSend = NotBlinking;
             	vPrintTwoStrings( pcTaskName, pcTextForTask_BlinkingOff );
+            	/* Take semaphore to block led task */
+            	xSemaphoreTake(SemaphoreHandle, portMAX_DELAY);
 			}
-			xQueueSendToBack( QueueHandle, &lValueToSend, portMAX_DELAY );
 		}
 
 		/* We want this task to execute every 250 milliseconds. */

@@ -95,8 +95,6 @@ void vTaskLed( void *pvParameters )
 {
 	/*  Declare & Initialize Task Function variables for argument, led, button and task */
 	LDX_Config_t * ptr = (LDX_Config_t *)pvParameters;
-	ledFlag_t lReceivedValue;
-
 	TickType_t xLastWakeTime;
 
 	/* The xLastWakeTime variable needs to be initialized with the current tick
@@ -111,8 +109,8 @@ void vTaskLed( void *pvParameters )
 	/* As per most tasks, this task is implemented in an infinite loop. */
 	for( ;; )
 	{
-		/* Check Led Flag */
-		if( ptr->ledFlag == Blinking )
+		/* Check if semaphore is available */
+		if( xSemaphoreTake(SemaphoreHandle, 0) == pdTRUE )
 		{
 			/* Check, Update and Print Led State */
 		   	if( ptr->ledState == GPIO_PIN_RESET )
@@ -127,14 +125,9 @@ void vTaskLed( void *pvParameters )
 		   	}
 			/* Update HW Led State */
 		   	HAL_GPIO_WritePin( ptr->LDX_GPIO_Port, ptr->LDX_Pin, ptr->ledState );
-		}
 
-		/* Check Queue Messages */
-		if( uxQueueMessagesWaiting( QueueHandle ) != 0 )
-		{
-			xQueueReceive( QueueHandle, &lReceivedValue, 0 );
-
-			ptr->ledFlag = lReceivedValue;
+		   	/* Release semaphore */
+		   	xSemaphoreGive(SemaphoreHandle);
 		}
 		/* We want this task to execute exactly every 250 milliseconds. */
 		vTaskDelayUntil( &xLastWakeTime, ledTickCntMAX );
