@@ -106,6 +106,8 @@ void vTaskLed( void *pvParameters )
 	/* Print out the name of this task. */
 	vPrintTwoStrings( pcTaskName, "   - is running\r\n" );
 
+	xSemaphoreTake(SemaphoreHandle, 0);
+
 	/* As per most tasks, this task is implemented in an infinite loop. */
 	for( ;; )
 	{
@@ -125,9 +127,6 @@ void vTaskLed( void *pvParameters )
 		   	}
 			/* Update HW Led State */
 		   	HAL_GPIO_WritePin( ptr->LDX_GPIO_Port, ptr->LDX_Pin, ptr->ledState );
-
-		   	/* Release semaphore */
-		   	xSemaphoreGive(SemaphoreHandle);
 		}
 		/* We want this task to execute exactly every 250 milliseconds. */
 		vTaskDelayUntil( &xLastWakeTime, ledTickCntMAX );
