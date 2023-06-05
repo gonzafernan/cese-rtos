@@ -84,6 +84,8 @@ LDX_Config_t	LDX_Config[] 	= { { LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET, NotBlin
 							  	    { LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET, NotBlinking, 0 }, \
 									{ LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET, NotBlinking, 0 } };
 
+ledFlag_t ledBlinkingFlag = NotBlinking;
+
 // ------ external data definition -------------------------------------
 
 // ------ internal functions definition --------------------------------
@@ -96,8 +98,6 @@ void vTaskLed( void *pvParameters )
 {
 	/*  Declare & Initialize Task Function variables for argument, led, button and task */
 	LDX_Config_t * ptr = (LDX_Config_t *) pvParameters;
-	ledFlag_t lReceivedValue;
-
 	TickType_t xLastWakeTime;
 
 	/* The xLastWakeTime variable needs to be initialized with the current tick
@@ -108,13 +108,6 @@ void vTaskLed( void *pvParameters )
 
 	/* Print out the name of this task. */
 	vPrintTwoStrings( pcTaskName, "   - is running\r\n" );
-
-	/* As per most tasks, this task is implemented within an infinite loop.
-	 *
-	 * Take the semaphore once to start with so the semaphore is empty before the
-	 * infinite loop is entered.  The semaphore was created before the scheduler
-	 * was started so before this task ran for the first time.*/
-    xSemaphoreTake( BinarySemaphoreHandle, (portTickType) 0 );
 
     /* As per most tasks, this task is implemented in an infinite loop. */
 	for( ;; )
@@ -137,21 +130,13 @@ void vTaskLed( void *pvParameters )
 		   	HAL_GPIO_WritePin( ptr->LDX_GPIO_Port, ptr->LDX_Pin, ptr->ledState );
 		}
 
-		/* Check Binary Semaphore */
-		if( xSemaphoreTake( BinarySemaphoreHandle, (portTickType) 0) == pdTRUE )
-		{
-        	/* Check, Update and Print Led Flag */
-			if( ptr->ledFlag == NotBlinking )
-			{
-				lReceivedValue = Blinking;
-			}
-			else
-			{
-				lReceivedValue = NotBlinking;
-			}
-			ptr->ledFlag = lReceivedValue;
-        	vPrintTwoStrings( pcTaskName, pcTextForTask_BinSemTaken );
-		}
+		/* Check mutex */
+		xSemaphoreTake( MutexHandle, portMAX_DELAY);
+
+		ptr->ledFlag = ledBlinkingFlag;
+
+		xSemaphoreGive( MutexHandle );
+
 		/* We want this task to execute exactly every 250 milliseconds. */
 		vTaskDelayUntil( &xLastWakeTime, ledTickCntMAX );
 	}

@@ -74,7 +74,7 @@ TaskHandle_t xTaskLedHandle;
 
 /* Declare a variable of type xSemaphoreHandle.  This is used to reference the
  * semaphore that is used to synchronize a task with other task. */
-SemaphoreHandle_t BinarySemaphoreHandle;
+SemaphoreHandle_t MutexHandle;
 
 // ------ internal functions declaration -------------------------------
 
@@ -99,10 +99,10 @@ void appInit( void )
   	vPrintString( pcTextForMain );
 
 	/* The binary semaphore is created. */
-	vSemaphoreCreateBinary( BinarySemaphoreHandle );
+	MutexHandle = xSemaphoreCreateMutex();
 
     /* Check the binary semaphore was created successfully */
-	configASSERT( BinarySemaphoreHandle != NULL );
+	configASSERT( MutexHandle != NULL );
 
 	ptr = &LDX_Config[0];
 	/* Task Led thread at priority 1 */

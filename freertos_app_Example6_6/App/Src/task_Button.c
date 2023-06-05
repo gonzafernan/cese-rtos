@@ -92,8 +92,6 @@ const char *pcTextForTask_BinSemGiven	= " - Binary Semaphore was given\r\n";
 void vTaskButton( void *pvParameters )
 {
 	/*  Declare & Initialize Task Function variables for argument, led, button and task */
-	static ledFlag_t lValueToSend = NotBlinking;
-
 	char *pcTaskName = (char *) pcTaskGetName( NULL );
 
 	/* Print out the name of this task. */
@@ -105,20 +103,18 @@ void vTaskButton( void *pvParameters )
 		/* Check HW Button State */
 		if( HAL_GPIO_ReadPin( USER_Btn_GPIO_Port, USER_Btn_Pin ) == GPIO_PIN_SET )
 		{
-        	/* Check, Update and Print Led Flag */
-			if( lValueToSend == NotBlinking )
+			xSemaphoreTake( MutexHandle, portMAX_DELAY);
+
+			if (ledBlinkingFlag == Blinking)
 			{
-				lValueToSend = Blinking;
-				vPrintTwoStrings( pcTaskName, pcTextForTask_BlinkingOn );
+				ledBlinkingFlag = NotBlinking;
 			}
 			else
 			{
-				lValueToSend = NotBlinking;
-            	vPrintTwoStrings( pcTaskName, pcTextForTask_BlinkingOff );
+				ledBlinkingFlag = Blinking;
 			}
-			/* 'Give' the semaphore to unblock the task. */
-        	vPrintTwoStrings( pcTaskName, pcTextForTask_BinSemGiven );
-			xSemaphoreGive( BinarySemaphoreHandle );
+
+			xSemaphoreGive( MutexHandle );
 		}
 
 		/* We want this task to execute every 250 milliseconds. */

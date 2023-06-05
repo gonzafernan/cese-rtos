@@ -62,7 +62,7 @@ extern TaskHandle_t xTaskLedHandle;
 
 /* Declare a variable of type xSemaphoreHandle.  This is used to reference the
  * semaphore that is used to synchronize a task with other task. */
-extern SemaphoreHandle_t BinarySemaphoreHandle;
+extern SemaphoreHandle_t MutexHandle;
 
 // ------ external functions declaration -------------------------------
 

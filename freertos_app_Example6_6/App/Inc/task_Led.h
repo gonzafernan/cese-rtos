@@ -69,6 +69,8 @@ typedef struct
 
 extern LDX_Config_t LDX_Config[];
 
+extern ledFlag_t ledBlinkingFlag;
+
 // ------ external functions declaration -------------------------------
 
 void vTaskLed( void *pvParameters );
