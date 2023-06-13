@@ -68,7 +68,7 @@
 
 // ------ internal data declaration ------------------------------------
 /* Events to excite tasks */
-typedef enum eTask_Test{ Error, Entry, Exit } eTask_Test_t;
+typedef enum eTask_Test{ Error, Entry, Exit, Exit2 } eTask_Test_t;
 
 // ------ internal functions declaration -------------------------------
 
@@ -84,6 +84,7 @@ const char *pcTextForTask_Test_eTask_TestArrayIndex	= "  <=> Task Test - eTask_T
 
 const char *pcTextForTask_Test_SignalEntry 			= "  <=> Task Test - Signal: Entry  <=>\r\n";
 const char *pcTextForTask_Test_SignalExit			= "  ==> Task Test - Signal: Exit   <=>\r\n";
+const char *pcTextForTask_Test_SignalExit2			= "  ==> Task Test - Signal: Exit 2  <=>\r\n";
 const char *pcTextForTask_Test_SignalError			= "  <=> Task Test - Signal: Error  <=>\r\n";
 const char *pcTextForTask_Test_Wait5000mS			= "  <=> Task Test - Wait:   5000mS <=>\r\n\n";
 
@@ -106,7 +107,7 @@ const eTask_Test_t eTask_TestArray[] = { Entry, Entry, Exit, Exit };
 
 #if( TEST_X == 3 )
 /* Array of events to excite tasks */
-const eTask_Test_t eTask_TestArray[] = { Entry, Entry, Entry, Entry, Exit, Exit, Exit, Exit };
+const eTask_Test_t eTask_TestArray[] = { Entry, Entry, Entry, Entry, Exit, Exit2, Exit, Exit2 };
 #endif
 
 #if( TEST_X == 4 )
@@ -180,8 +181,14 @@ void vTask_Test( void *pvParameters )
 
 				    /* 'Give' the semaphore to unblock the task B. */
 		    		vPrintString( pcTextForTask_Test_SignalExit );
-		    		xSemaphoreGive( xBinarySemaphoreExit );
+		    		xSemaphoreGive( xBinarySemaphoreExit[0] );
 	    			break;
+
+	    		case Exit2:
+	    			/* 'Give' the semaphore to unblock the task B. */
+					vPrintString( pcTextForTask_Test_SignalExit2 );
+					xSemaphoreGive( xBinarySemaphoreExit[1] );
+					break;
 
 		    	case Error:
 		    	default:

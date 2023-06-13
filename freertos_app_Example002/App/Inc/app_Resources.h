@@ -52,14 +52,21 @@
 // ------ inclusions ---------------------------------------------------
 
 // ------ macros -------------------------------------------------------
+#define Task_BQuantity	2
 
 // ------ typedef ------------------------------------------------------
+
+typedef struct {
+	uint8_t taskId;
+	xSemaphoreHandle xBinarySemaphoreExit;
+	uint32_t lTask_BFlag;
+} Task_B_Param;
 
 // ------ external data declaration ------------------------------------
 /* Declare a variable of type xSemaphoreHandle.  This is used to reference the
  * semaphore that is used to synchronize a task with other task. */
 extern xSemaphoreHandle xBinarySemaphoreEntry;
-extern xSemaphoreHandle xBinarySemaphoreExit;
+extern xSemaphoreHandle xBinarySemaphoreExit[Task_BQuantity];
 extern xSemaphoreHandle xCountingSemaphoreContinue;
 
 /* Declare a variable of type xSemaphoreHandle.  This is used to reference the
@@ -68,7 +75,7 @@ extern xSemaphoreHandle xMutex;
 
 /* Used to hold the handle of Tasks. */
 extern xTaskHandle vTask_AHandle;
-extern xTaskHandle vTask_BHandle;
+extern xTaskHandle vTask_BHandle[Task_BQuantity];
 extern xTaskHandle vTask_TestHandle;
 
 /* Task A & B Counter	*/

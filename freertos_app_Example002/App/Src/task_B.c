@@ -68,7 +68,7 @@
 
 // ------ internal data declaration ------------------------------------
 /* Task B Flag */
-uint32_t lTask_BFlag;
+// uint32_t lTask_BFlag;
 
 // ------ internal functions declaration -------------------------------
 
@@ -76,15 +76,17 @@ uint32_t lTask_BFlag;
 /* Define the strings that will be passed in as the Supporting Functions parameters.
  * These are defined const and off the stack to ensure they remain valid when the
  * tasks are executing. */
-const char *pcTextForTask_B    					= "  ==> Task    B - Running\r\n";
+char Task_BPrefix[2][20] = {"Task B1 ", "Task B2 "};
 
-const char *pcTextForTask_B_lTasksCnt			= "  <=> Task    B - lTasksCnt :";
+const char *pcTextForTask_B    					= "- Running\r\n";
 
-const char *pcTextForTask_B_WaitExit			= "  ==> Task    B - Wait:   Exit        \r\n\n";
-const char *pcTextForTask_B_SignalContinue   	= "  ==> Task    B - Signal: Continue ==>\r\n\n";
+const char *pcTextForTask_B_lTasksCnt			= "- lTasksCnt :";
 
-const char *pcTextForTask_B_WaitMutex        	= "  ==> Task    B - Wait:   Mutex       \r\n\n";
-const char *pcTextForTask_B_SignalMutex      	= "  ==> Task    B - Signal: Mutex    ==>\r\n\n";
+const char *pcTextForTask_B_WaitExit			= "- Wait:   Exit        \r\n\n";
+const char *pcTextForTask_B_SignalContinue   	= "- Signal: Continue ==>\r\n\n";
+
+const char *pcTextForTask_B_WaitMutex        	= "- Wait:   Mutex       \r\n\n";
+const char *pcTextForTask_B_SignalMutex      	= "- Signal: Mutex    ==>\r\n\n";
 
 // ------ external data definition -------------------------------------
 
@@ -98,6 +100,14 @@ void vTask_B( void *pvParameters )
 {
 	/* Print out the name of this task. */
 	vPrintString( pcTextForTask_B );
+
+	/* Receive binary semaphore as parameter */
+	Task_B_Param *task_param;
+	task_param = (Task_B_Param *)pvParameters;
+	uint8_t taskId = task_param->taskId;
+	uint32_t lTask_BFlag = task_param->lTask_BFlag;
+
+	xSemaphoreHandle xBinarySemaphoreExit = task_param->xBinarySemaphoreExit;
 
 	/* As per most tasks, this task is implemented within an infinite loop.
 	 *
@@ -118,7 +128,7 @@ void vTask_B( void *pvParameters )
          * indefinitely meaning this function call will only return once the
          * semaphore has been successfully obtained - so there is no need to check
          * the returned value. */
-		vPrintString( pcTextForTask_B_WaitExit );
+		vPrintTwoStrings(Task_BPrefix[taskId], pcTextForTask_B_WaitExit );
         xSemaphoreTake( xBinarySemaphoreExit, portMAX_DELAY );
         {
         	/* The semaphore is created before the scheduler is started so already
@@ -129,7 +139,7 @@ void vTask_B( void *pvParameters )
     		 * the semaphore has been successfully obtained so there is no need to check
     		 * the return value.  If any other delay period was used then the code must
     		 * check that xSemaphoreTake() returns pdTRUE before accessing the resource. */
-        	vPrintString( pcTextForTask_B_WaitMutex );
+        	vPrintTwoStrings(Task_BPrefix[taskId], pcTextForTask_B_WaitMutex );
         	xSemaphoreTake( xMutex, portMAX_DELAY );
         	{
         		/* The following line will only execute once the semaphore has been
@@ -146,7 +156,7 @@ void vTask_B( void *pvParameters )
     				lTask_BFlag = 1;
     			}
     			/* 'Give' the semaphore to unblock the tasks. */
-        		vPrintString( pcTextForTask_B_SignalMutex );
+    			vPrintTwoStrings(Task_BPrefix[taskId], pcTextForTask_B_SignalMutex );
         		xSemaphoreGive( xMutex );
 
    			    /* Check Task B Flag	*/
@@ -156,7 +166,7 @@ void vTask_B( void *pvParameters )
        			    lTask_BFlag = 0;
 
         			/* 'Give' the semaphore to unblock the task A. */
-       	        	vPrintString( pcTextForTask_B_SignalContinue );
+       			    vPrintTwoStrings(Task_BPrefix[taskId], pcTextForTask_B_SignalContinue );
        	        	xSemaphoreGive( xCountingSemaphoreContinue );
        			}
         	}
