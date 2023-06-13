@@ -60,7 +60,7 @@
  * semaphore that is used to synchronize a task with other task. */
 extern xSemaphoreHandle xBinarySemaphoreEntry;
 extern xSemaphoreHandle xBinarySemaphoreExit;
-extern xSemaphoreHandle xBinarySemaphoreContinue;
+extern xSemaphoreHandle xCountingSemaphoreContinue;
 
 /* Declare a variable of type xSemaphoreHandle.  This is used to reference the
  * mutex type semaphore that is used to ensure mutual exclusive access to...*/

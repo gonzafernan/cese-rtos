@@ -157,7 +157,7 @@ void vTask_B( void *pvParameters )
 
         			/* 'Give' the semaphore to unblock the task A. */
        	        	vPrintString( pcTextForTask_B_SignalContinue );
-       	        	xSemaphoreGive( xBinarySemaphoreContinue );
+       	        	xSemaphoreGive( xCountingSemaphoreContinue );
        			}
         	}
         }

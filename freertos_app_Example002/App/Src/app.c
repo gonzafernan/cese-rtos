@@ -73,7 +73,10 @@
  * semaphore that is used to synchronize a task with other task. */
 xSemaphoreHandle xBinarySemaphoreEntry;
 xSemaphoreHandle xBinarySemaphoreExit;
-xSemaphoreHandle xBinarySemaphoreContinue;
+// xSemaphoreHandle xBinarySemaphoreContinue;
+
+/* Replace binary semaphore with counting semaphore */
+xSemaphoreHandle xCountingSemaphoreContinue;
 
 /* Declare a variable of type xSemaphoreHandle.  This is used to reference the
  * mutex type semaphore that is used to ensure mutual exclusive access to ........ */
@@ -110,17 +113,20 @@ void appInit( void )
      * In this example a binary semaphore is created. */
     vSemaphoreCreateBinary( xBinarySemaphoreEntry    );
     vSemaphoreCreateBinary( xBinarySemaphoreExit     );
-    vSemaphoreCreateBinary( xBinarySemaphoreContinue );
+    // vSemaphoreCreateBinary( xBinarySemaphoreContinue );
+
+    /* Create counting semaphore */
+    xCountingSemaphoreContinue = xSemaphoreCreateCounting(1, 0);
 
     /* Check the semaphore was created successfully. */
 	configASSERT( xBinarySemaphoreEntry    !=  NULL );
 	configASSERT( xBinarySemaphoreExit     !=  NULL );
-	configASSERT( xBinarySemaphoreContinue !=  NULL );
+	configASSERT( xCountingSemaphoreContinue !=  NULL );
 
     /* Add semaphore to registry. */
 	vQueueAddToRegistry(xBinarySemaphoreEntry,    "xBinarySemaphoreEntry");
     vQueueAddToRegistry(xBinarySemaphoreExit,     "xBinarySemaphoreExit");
-    vQueueAddToRegistry(xBinarySemaphoreContinue, "xBinarySemaphoreContinue");
+    vQueueAddToRegistry(xCountingSemaphoreContinue, "xCountingSemaphoreContinue");
 
     /* Before a semaphore is used it must be explicitly created.
      * In this example a mutex semaphore is created. */
