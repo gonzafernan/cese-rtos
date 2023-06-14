@@ -95,7 +95,6 @@ QueueHandle_t xQueueVehicle;
 QueueHandle_t xQueueVehicleDateTime;
 
 /* Task B names */
-char Task_BNames[2][10] = {"Task B1", "Task B2"};
 Task_B_Param Task_BParam[Task_BQuantity];
 
 /* Task A & B Counter	*/
@@ -125,7 +124,7 @@ void appInit( void )
     vSemaphoreCreateBinary( xBinarySemaphoreEntry );
 
     /* Create counting semaphore */
-    xCountingSemaphoreContinue = xSemaphoreCreateCounting(1, 0);
+    xCountingSemaphoreContinue = xSemaphoreCreateCounting(Task_BQuantity, 0);
 
     /* Check the semaphore was created successfully. */
 	configASSERT( xBinarySemaphoreEntry !=  NULL );
@@ -166,6 +165,9 @@ void appInit( void )
     /* Check the task was created successfully. */
     configASSERT( ret == pdPASS );
 
+    /* Task B name */
+    char taskBName[15];
+
     /* Task B thread at priority 2 */
     for (uint8_t i = 0; i < Task_BQuantity; i++)
     {
@@ -173,15 +175,16 @@ void appInit( void )
     	vSemaphoreCreateBinary( xBinarySemaphoreExit[i]     );
     	configASSERT( xBinarySemaphoreExit[i]     !=  NULL );
 
+    	sprintf(taskBName, "Task B%d", i+1);
     	/* Initialize parameters structure for task B */
-    	Task_BParam[i].taskId = i;
+    	strcpy(Task_BParam[i].taskName, taskBName);
     	Task_BParam[i].xBinarySemaphoreExit = xBinarySemaphoreExit[i];
     	Task_BParam[i].lTask_BFlag = 0;
 
     	//vQueueAddToRegistry(xBinarySemaphoreExit,     "xBinarySemaphoreExit");
     	/* Create Task_BQuantity tasks vTaskB */
     	ret = xTaskCreate( vTask_B,						/* Pointer to the function thats implement the task. */
-    					   Task_BNames[i],					/* Text name for the task. This is to facilitate debugging only. */
+    						taskBName,					/* Text name for the task. This is to facilitate debugging only. */
 						   (2 * configMINIMAL_STACK_SIZE),	/* Stack depth in words. 				*/
 						   (void *)&Task_BParam[i],						/* Receive the semaphore as parameter.		*/
 						   (tskIDLE_PRIORITY + 2UL),	/* This task will run at priority 1. 		*/
@@ -202,7 +205,7 @@ void appInit( void )
     /* Check the task was created successfully. */
     configASSERT( ret == pdPASS );
 
-    /* Task Monitor at priority 1, periodically excites the other tasks */
+    /* Task Monitor at priority 1, exit vehicle monitor */
     ret = xTaskCreate( vTask_Monitor,					/* Pointer to the function thats implement the task. */
 					   "Task Monitor",					/* Text name for the task. This is to facilitate debugging only. */
 					   (2 * configMINIMAL_STACK_SIZE),	/* Stack depth in words. 				*/

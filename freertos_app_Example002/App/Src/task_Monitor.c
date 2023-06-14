@@ -62,7 +62,6 @@
 
 /* Application includes. */
 #include "app_Resources.h"
-#include "task_A.h"
 
 // ------ Macros and definitions ---------------------------------------
 

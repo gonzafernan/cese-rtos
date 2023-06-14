@@ -179,13 +179,13 @@ void vTask_Test( void *pvParameters )
 
 	    		case Exit:
 
-				    /* 'Give' the semaphore to unblock the task B. */
+				    /* 'Give' the semaphore to unblock the task B1. */
 		    		vPrintString( pcTextForTask_Test_SignalExit );
 		    		xSemaphoreGive( xBinarySemaphoreExit[0] );
 	    			break;
 
 	    		case Exit2:
-	    			/* 'Give' the semaphore to unblock the task B. */
+	    			/* 'Give' the semaphore to unblock the task B2. */
 					vPrintString( pcTextForTask_Test_SignalExit2 );
 					xSemaphoreGive( xBinarySemaphoreExit[1] );
 					break;

@@ -60,7 +60,7 @@
 // ------ typedef ------------------------------------------------------
 
 typedef struct {
-	uint8_t taskId;
+	char taskName[15];
 	xSemaphoreHandle xBinarySemaphoreExit;
 	uint32_t lTask_BFlag;
 } Task_B_Param;

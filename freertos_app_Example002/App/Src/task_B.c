@@ -76,11 +76,10 @@
 /* Define the strings that will be passed in as the Supporting Functions parameters.
  * These are defined const and off the stack to ensure they remain valid when the
  * tasks are executing. */
-char Task_BPrefix[2][20] = {"Task B1 ", "Task B2 "};
 
 const char *pcTextForTask_B    					= "- Running\r\n";
 
-const char *pcTextForTask_B_lTasksCnt			= "- lTasksCnt :";
+const char *pcTextForTask_B_lTasksCnt			= "Task B - lTasksCnt :";
 
 const char *pcTextForTask_B_WaitExit			= "- Wait:   Exit\r\n\n";
 const char *pcTextForTask_B_SignalContinue   	= "- Signal: Continue\r\n\n";
@@ -100,16 +99,18 @@ MonitorQueueStruct vehicle_log;
 /* Task B thread */
 void vTask_B( void *pvParameters )
 {
-	/* Print out the name of this task. */
-	vPrintString( pcTextForTask_B );
 
 	TaskHandle_t xOwnTaskHandle = xTaskGetCurrentTaskHandle();
 
-	/* Receive binary semaphore as parameter */
+	/* Receive parameters structure */
+	char taskName[15];
 	Task_B_Param *task_param;
 	task_param = (Task_B_Param *)pvParameters;
-	uint8_t taskId = task_param->taskId;
+	strcpy(taskName, task_param->taskName);
 	uint32_t lTask_BFlag = task_param->lTask_BFlag;
+
+	/* Print out the name of this task. */
+	vPrintTwoStrings(taskName, pcTextForTask_B );
 
 	xSemaphoreHandle xBinarySemaphoreExit = task_param->xBinarySemaphoreExit;
 
@@ -136,7 +137,7 @@ void vTask_B( void *pvParameters )
          * indefinitely meaning this function call will only return once the
          * semaphore has been successfully obtained - so there is no need to check
          * the returned value. */
-		vPrintTwoStrings(Task_BPrefix[taskId], pcTextForTask_B_WaitExit );
+		vPrintTwoStrings(taskName, pcTextForTask_B_WaitExit );
         xSemaphoreTake( xBinarySemaphoreExit, portMAX_DELAY );
         {
         	/* The semaphore is created before the scheduler is started so already
@@ -147,7 +148,7 @@ void vTask_B( void *pvParameters )
     		 * the semaphore has been successfully obtained so there is no need to check
     		 * the return value.  If any other delay period was used then the code must
     		 * check that xSemaphoreTake() returns pdTRUE before accessing the resource. */
-        	vPrintTwoStrings(Task_BPrefix[taskId], pcTextForTask_B_WaitMutex );
+        	vPrintTwoStrings(taskName, pcTextForTask_B_WaitMutex );
         	xSemaphoreTake( xMutex, portMAX_DELAY );
         	{
         		/* The following line will only execute once the semaphore has been
@@ -164,7 +165,7 @@ void vTask_B( void *pvParameters )
     				lTask_BFlag = 1;
     			}
     			/* 'Give' the semaphore to unblock the tasks. */
-    			vPrintTwoStrings(Task_BPrefix[taskId], pcTextForTask_B_SignalMutex );
+    			vPrintTwoStrings(taskName, pcTextForTask_B_SignalMutex );
         		xSemaphoreGive( xMutex );
 
    			    /* Check Task B Flag	*/
@@ -174,7 +175,7 @@ void vTask_B( void *pvParameters )
        			    lTask_BFlag = 0;
 
         			/* 'Give' the semaphore to unblock the task A. */
-       			    vPrintTwoStrings(Task_BPrefix[taskId], pcTextForTask_B_SignalContinue );
+       			    vPrintTwoStrings(taskName, pcTextForTask_B_SignalContinue );
        	        	xSemaphoreGive( xCountingSemaphoreContinue );
        			}
         	}
