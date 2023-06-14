@@ -66,6 +66,7 @@
 #include "task_A.h"
 #include "task_B.h"
 #include "task_Test.h"
+#include "task_Monitor.h"
 
 // ------ Macros and definitions ---------------------------------------
 
@@ -87,15 +88,14 @@ xSemaphoreHandle xMutex;
 xTaskHandle vTask_AHandle;
 xTaskHandle vTask_BHandle[Task_BQuantity];
 xTaskHandle vTask_TestHandle;
+xTaskHandle vTask_MonitorHandle;
+
+/* Queue Handles for Monitor task */
+QueueHandle_t xQueueVehicle;
+QueueHandle_t xQueueVehicleDateTime;
 
 /* Task B names */
 char Task_BNames[2][10] = {"Task B1", "Task B2"};
-//char pcTextForTask_B[2][100] = {"==> Task B1 - Running\r\n", "==> Task B2 - Running\r\n"};
-//char pcTextForTask_B_lTasksCnt[2][100] = {"  <=> Task    B1 - lTasksCnt :", "  <=> Task    B2 - lTasksCnt :"};
-//char pcTextForTask_B_WaitExit[2][100] = {"  ==> Task    B1 - Wait:   Exit        \r\n\n", "  ==> Task    B2 - Wait:   Exit        \r\n\n"};
-//char pcTextForTask_B_SignalContinue[2][100] = {"  ==> Task    B1 - Signal: Continue ==>\r\n\n", "  ==> Task    B2 - Signal: Continue ==>\r\n\n"};
-//char pcTextForTask_B_WaitMutex[2][100] = {"  ==> Task    B1 - Wait:   Mutex       \r\n\n", "  ==> Task    B2 - Wait:   Mutex       \r\n\n"};
-//char pcTextForTask_B_SignalMutex[2][100] = {"  ==> Task    B1 - Signal: Mutex    ==>\r\n\n", "  ==> Task    B2 - Signal: Mutex    ==>\r\n\n"};
 Task_B_Param Task_BParam[Task_BQuantity];
 
 /* Task A & B Counter	*/
@@ -122,22 +122,26 @@ void appInit( void )
 
     /* Before a semaphore is used it must be explicitly created.
      * In this example a binary semaphore is created. */
-    vSemaphoreCreateBinary( xBinarySemaphoreEntry    );
-    //vSemaphoreCreateBinary( xBinarySemaphoreExit     );
-    // vSemaphoreCreateBinary( xBinarySemaphoreContinue );
+    vSemaphoreCreateBinary( xBinarySemaphoreEntry );
 
     /* Create counting semaphore */
     xCountingSemaphoreContinue = xSemaphoreCreateCounting(1, 0);
 
     /* Check the semaphore was created successfully. */
-	configASSERT( xBinarySemaphoreEntry    !=  NULL );
-	// configASSERT( xBinarySemaphoreExit     !=  NULL );
+	configASSERT( xBinarySemaphoreEntry !=  NULL );
 	configASSERT( xCountingSemaphoreContinue !=  NULL );
 
     /* Add semaphore to registry. */
 	vQueueAddToRegistry(xBinarySemaphoreEntry,    "xBinarySemaphoreEntry");
-    //vQueueAddToRegistry(xBinarySemaphoreExit,     "xBinarySemaphoreExit");
     vQueueAddToRegistry(xCountingSemaphoreContinue, "xCountingSemaphoreContinue");
+
+    /* Create queues for Monitor task */
+    xQueueVehicle = xQueueCreate(MAX_QUEUE_MONITOR_SIZE, sizeof(MonitorQueueStruct));
+    xQueueVehicleDateTime = xQueueCreate(MAX_QUEUE_MONITOR_SIZE, sizeof(MonitorQueueStruct));
+
+    /* Check the queue was created successfully. */
+	configASSERT( xQueueVehicle !=  NULL );
+	configASSERT( xQueueVehicleDateTime !=  NULL );
 
     /* Before a semaphore is used it must be explicitly created.
      * In this example a mutex semaphore is created. */
@@ -194,6 +198,17 @@ void appInit( void )
 					   NULL,						/* We are not using the task parameter.		*/
 					   (tskIDLE_PRIORITY + 1UL),	/* This task will run at priority 2. 		*/
 					   &vTask_TestHandle );			/* We are using a variable as task handle.	*/
+
+    /* Check the task was created successfully. */
+    configASSERT( ret == pdPASS );
+
+    /* Task Monitor at priority 1, periodically excites the other tasks */
+    ret = xTaskCreate( vTask_Monitor,					/* Pointer to the function thats implement the task. */
+					   "Task Monitor",					/* Text name for the task. This is to facilitate debugging only. */
+					   (2 * configMINIMAL_STACK_SIZE),	/* Stack depth in words. 				*/
+					   NULL,						/* We are not using the task parameter.		*/
+					   (tskIDLE_PRIORITY + 1UL),	/* This task will run at priority 2. 		*/
+					   &vTask_MonitorHandle );			/* We are using a variable as task handle.	*/
 
     /* Check the task was created successfully. */
     configASSERT( ret == pdPASS );

@@ -82,11 +82,13 @@ const char *pcTextForTask_B    					= "- Running\r\n";
 
 const char *pcTextForTask_B_lTasksCnt			= "- lTasksCnt :";
 
-const char *pcTextForTask_B_WaitExit			= "- Wait:   Exit        \r\n\n";
-const char *pcTextForTask_B_SignalContinue   	= "- Signal: Continue ==>\r\n\n";
+const char *pcTextForTask_B_WaitExit			= "- Wait:   Exit\r\n\n";
+const char *pcTextForTask_B_SignalContinue   	= "- Signal: Continue\r\n\n";
 
-const char *pcTextForTask_B_WaitMutex        	= "- Wait:   Mutex       \r\n\n";
-const char *pcTextForTask_B_SignalMutex      	= "- Signal: Mutex    ==>\r\n\n";
+const char *pcTextForTask_B_WaitMutex        	= "- Wait:   Mutex\r\n\n";
+const char *pcTextForTask_B_SignalMutex      	= "- Signal: Mutex\r\n\n";
+
+MonitorQueueStruct vehicle_log;
 
 // ------ external data definition -------------------------------------
 
@@ -100,6 +102,8 @@ void vTask_B( void *pvParameters )
 {
 	/* Print out the name of this task. */
 	vPrintString( pcTextForTask_B );
+
+	TaskHandle_t xOwnTaskHandle = xTaskGetCurrentTaskHandle();
 
 	/* Receive binary semaphore as parameter */
 	Task_B_Param *task_param;
@@ -115,6 +119,10 @@ void vTask_B( void *pvParameters )
 	 * infinite loop is entered.  The semaphore was created before the scheduler
 	 * was started so before this task ran for the first time.*/
     xSemaphoreTake( xBinarySemaphoreExit, (portTickType) 0 );
+
+    /* Initialize vehicle log info */
+    strcpy(vehicle_log.numVehicle, "ABC123");
+    vehicle_log.xTask_BXHandle = xOwnTaskHandle;
 
     /* Reset Task B Flag	*/
     lTask_BFlag = 0;
@@ -170,6 +178,7 @@ void vTask_B( void *pvParameters )
        	        	xSemaphoreGive( xCountingSemaphoreContinue );
        			}
         	}
+        	xQueueSend(xQueueVehicle, &vehicle_log, 0);
         }
 	}
 }

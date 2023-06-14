@@ -33,7 +33,7 @@
 
 /*--------------------------------------------------------------------*-
 
-    app_Resources.h (Released 2022-06)
+    task_Test.h (Released 2022-06)
 
   --------------------------------------------------------------------
 
@@ -42,8 +42,8 @@
 -*--------------------------------------------------------------------*/
 
 
-#ifndef __APP_RESOURCES_H
-#define __APP_RESOURCES_H
+#ifndef __TASK_MONITOR_H
+#define __TASK_MONITOR_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -52,57 +52,20 @@
 // ------ inclusions ---------------------------------------------------
 
 // ------ macros -------------------------------------------------------
-#define Task_BQuantity			2
-#define MAX_QUEUE_MONITOR_SIZE	10
-#define DATE_TIME_LENGTH		14
-#define NUM_VEHICLE_LENGTH		6
 
 // ------ typedef ------------------------------------------------------
 
-typedef struct {
-	uint8_t taskId;
-	xSemaphoreHandle xBinarySemaphoreExit;
-	uint32_t lTask_BFlag;
-} Task_B_Param;
-
-typedef struct {
-	char numVehicle[NUM_VEHICLE_LENGTH];
-	xTaskHandle xTask_BXHandle;
-	char DateTime[DATE_TIME_LENGTH];
-} MonitorQueueStruct;
-
 // ------ external data declaration ------------------------------------
-/* Declare a variable of type xSemaphoreHandle.  This is used to reference the
- * semaphore that is used to synchronize a task with other task. */
-extern xSemaphoreHandle xBinarySemaphoreEntry;
-extern xSemaphoreHandle xBinarySemaphoreExit[Task_BQuantity];
-extern xSemaphoreHandle xCountingSemaphoreContinue;
-
-/* Declare a variable of type xSemaphoreHandle.  This is used to reference the
- * mutex type semaphore that is used to ensure mutual exclusive access to...*/
-extern xSemaphoreHandle xMutex;
-
-/* Queue Handles for Monitor task */
-extern QueueHandle_t xQueueVehicle;
-extern QueueHandle_t xQueueVehicleDateTime;
-
-/* Used to hold the handle of Tasks. */
-extern xTaskHandle vTask_AHandle;
-extern xTaskHandle vTask_BHandle[Task_BQuantity];
-extern xTaskHandle vTask_TestHandle;
-extern xTaskHandle vTask_MonitorHandle;
-
-/* Task A & B Counter	*/
-#define lTasksCntMAX	3
-extern uint32_t	lTasksCnt;
 
 // ------ external functions declaration -------------------------------
+
+void vTask_Monitor( void *pvParameters );
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __APP_RESOURCES_H */
+#endif /* __TASK_MONITOR_H */
 
 /*------------------------------------------------------------------*-
   ---- END OF FILE -------------------------------------------------
